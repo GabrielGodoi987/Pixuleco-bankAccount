@@ -1,0 +1,37 @@
+version: '3.8'
+name: pixuleco-development
+services:
+  redis:
+   image: redis:latest
+   ports:
+    - "6379:6379"
+   volumes:
+    - redis-volume:/data
+
+  db:
+    image: postgres:latest
+    container_name: pixuleco-test-database
+    ports:
+      - 5432:5432
+    ttl: true
+    restart: always
+    volumes: 
+     - database-data:/var/lib/postgresql/data
+    environment:
+      - POSGRES_USER=root
+      - POSTGRES_PASSWORD=docker
+      - POSTGRES_DB=pixuleco-development-database
+  api:
+    build: .
+    volumes:
+      - .:/app
+    ports:
+     - "3050:3050"
+    restart: always
+    depends_on:
+      - db
+      - redis
+
+volumes: 
+  redis-volume: {}
+  database-data: {}
