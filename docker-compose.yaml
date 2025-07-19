@@ -1,4 +1,4 @@
-version: '3.8'
+version: '3.5'
 name: pixuleco-development
 services:
   redis:
@@ -9,28 +9,50 @@ services:
     - redis-volume:/data
 
   db:
-    image: postgres:latest
-    container_name: pixuleco-test-database
+    image: postgres:17.5
+    container_name: pixuleco-development-database
     ports:
-      - 5432:5432
-    ttl: true
+      - "5432:5432"
     restart: always
     volumes: 
      - database-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
     environment:
-      - POSGRES_USER=root
-      - POSTGRES_PASSWORD=docker
+      - POSTGRES_USERNAME=postgres
+      - POSTGRES_PASSWORD=postgres
       - POSTGRES_DB=pixuleco-development-database
-  api:
-    build: .
-    volumes:
-      - .:/app
-    ports:
-     - "3050:3050"
+
+  pgadmin:
+    image: dpage/pgadmin4
     restart: always
+    container_name: nest-pgadmin4
+    environment:
+      - PGADMIN_DEFAULT_EMAIL=admin@admin.com
+      - PGADMIN_DEFAULT_PASSWORD=pgadmin4
+    ports:
+      - '8080:8080'
     depends_on:
       - db
-      - redis
+
+  api:
+    container_name: pixuleco-development
+    build: .
+    volumes:
+      - ./src:/app/src
+    ports:
+     - "3000:3000"
+    restart: always
+    environment:
+      - PORT=${PORT}
+    depends_on:
+      db:
+       condition: service_healthy
+      redis:
+       condition: service_healthy
 
 volumes: 
   redis-volume: {}
