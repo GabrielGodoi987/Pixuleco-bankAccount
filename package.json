@@ -4,7 +4,7 @@
   "description": "",
   "author": "",
   "private": true,
-  "license": "UNLICENSED",
+  "license": "MIT",
   "scripts": {
     "build": "nest build",
     "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
@@ -17,7 +17,11 @@
     "test:watch": "jest --watch",
     "test:cov": "jest --coverage",
     "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
-    "test:e2e": "jest --config ./test/jest-e2e.json"
+    "test:e2e": "jest --config ./test/jest-e2e.json",
+    "typeorm": "ts-node ./node_modules/typeorm/cli",
+    "migration:create": "typeorm migration:create",
+    "migration:run": "npm run typeorm -- --dataSource=src/database/connection/datasource.ts migration:run",
+    "seed": "ts-node src/shared/database/seeds/main.seed.ts"
   },
   "dependencies": {
     "@keyv/redis": "^4.6.0",
@@ -26,6 +30,7 @@
     "@nestjs/core": "^11.0.1",
     "@nestjs/mapped-types": "*",
     "@nestjs/platform-express": "^11.0.1",
+    "@nestjs/typeorm": "^11.0.0",
     "bullmq": "^5.56.4",
     "class-transformer": "^0.5.1",
     "class-validator": "^0.14.2",

@@ -8,11 +8,16 @@ RUN apt update && \
 
 WORKDIR /app
 
-COPY . .
+COPY package*.json ./
+
 
 RUN npm install
 
+COPY . .
+
 RUN npm run build
+
+RUN npm run migration:run
 
 EXPOSE 3050
 

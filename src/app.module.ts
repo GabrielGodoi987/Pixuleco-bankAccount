@@ -5,9 +5,16 @@ import { AccountModule } from './business-modules/account/account.module';
 import { TransactionsModule } from './business-modules/transactions/transactions.module';
 import { UserModule } from './business-modules/user/user.module';
 import { DatabaseModule } from './database/database.module';
-
+import { TypeOrmModule } from '@nestjs/typeorm';
+import { dataSourceOptions } from './database/connection/datasource';
 @Module({
-  imports: [DatabaseModule, UserModule, TransactionsModule, AccountModule],
+  imports: [
+    TypeOrmModule.forRoot(dataSourceOptions),
+    DatabaseModule,
+    UserModule,
+    AccountModule,
+    TransactionsModule,
+  ],
   controllers: [AppController],
   providers: [AppService],
 })
