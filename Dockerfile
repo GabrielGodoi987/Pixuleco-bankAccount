@@ -1,24 +1,26 @@
-FROM node:20-slim
+## build development ready image
+ARG IMAGE=node:22-alpine
 
-RUN apt update && \
-    apt upgrade -y && \
-    apt install --no-install-recommends openssl procps -y && \
-    rm -rf /var/lib/apt/lists/* && \
-    npm install -g @nestjs/cli@10.4.8
+#commo layer
+# from construction variable create an named initiator(builder)
+FROM ${IMAGE} AS builder
 
-WORKDIR /app
+# Defines an base directory to subsequences commands
+WORKDIR /http/app
 
-COPY package*.json ./
-
+# COPY all the directories and files from the host machine to the container
+COPY . .
 
 RUN npm install
 
-COPY . .
+#Test layer
+FROM builder AS test
 
-RUN npm run build
+COPY ./testentrypoint.sh /entrypoint.sh
 
-RUN npm run migration:run
+# give the necessary permissions to the entrypoint file
+RUN chmod +x /entrypoint.sh
 
-EXPOSE 3050
-
-CMD [ "npm", "run", "start:dev" ]
+## entrypoint allows us to encapsulate and run additional scripts in a specific file
+## it works similar to the CMD command, however we are running a diferent file here
+ENTRYPOINT ["/entrypoint.sh"]
