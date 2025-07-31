@@ -1,59 +1,50 @@
-version: '3.5'
-name: pixuleco-development
 services:
-  redis:
-   image: redis:latest
-   ports:
-    - "6379:6379"
-   volumes:
-    - redis-volume:/data
-
   db:
-    image: postgres:17.5
-    container_name: pixuleco-development-database
-    ports:
-      - "5432:5432"
-    restart: always
-    volumes: 
-     - database-data:/var/lib/postgresql/data
+    image: postgres:17-alpine
+    environment:
+      POSTGRES_PASSWORD: docker
+      POSTGRES_USERNAME: postgres
+      POSTGRES_DB: pixuleco
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready"]
-      interval: 10s
+      test: [ "CMD-SHELL", "pg_isready -U postgres" ]
+      interval: 5s
       timeout: 5s
       retries: 5
-    environment:
-      - POSTGRES_USERNAME=postgres
-      - POSTGRES_PASSWORD=postgres
-      - POSTGRES_DB=pixuleco-development-database
-
-  pgadmin:
-    image: dpage/pgadmin4
-    restart: always
-    container_name: nest-pgadmin4
-    environment:
-      - PGADMIN_DEFAULT_EMAIL=admin@admin.com
-      - PGADMIN_DEFAULT_PASSWORD=pgadmin4
+    volumes:
+      - database_volume:/var/lib/postgresql/data
     ports:
-      - '8080:8080'
+      - "5432:5432"
+    networks:
+      - pixuleco-network
+
+  pixuleco-api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: test
+    working_dir: /http/app
+    volumes:
+      - .:/http/app:delegated
+      - /http/app/node_modules
+    environment:
+      DB_HOST: db
+      DB_PORT: 5432
+      DB_USER: postgres
+      DB_PASSWORD: docker
+      DB_NAME: pixuleco
+    ports:
+      - "3000:3000"
     depends_on:
       - db
+    networks:
+      - pixuleco-network
+    command: [sh, -c, 'npm run start:dev']
 
-  api:
-    container_name: pixuleco-development
-    build: .
-    volumes:
-      - ./src:/app/src
-    ports:
-     - "3000:3000"
-    restart: always
-    environment:
-      - PORT=${PORT}
-    depends_on:
-      db:
-       condition: service_healthy
-      redis:
-       condition: service_healthy
 
-volumes: 
-  redis-volume: {}
-  database-data: {}
+
+volumes:
+  database_volume: {}
+
+networks:
+  pixuleco-network:
+    driver: bridge
