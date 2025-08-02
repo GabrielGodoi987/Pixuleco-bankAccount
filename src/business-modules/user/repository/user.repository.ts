@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { UserEntity } from 'src/database/entities/user.entity';
-import { Repository } from 'typeorm';
+import { Repository, UpdateResult } from 'typeorm';
 import { User } from '../entities/user.entity';
 import { Account } from 'src/business-modules/account/etities/account.entity';
 import { AccountRepository } from 'src/business-modules/account/repositories/account.repository';
@@ -49,26 +49,73 @@ export class UserRepository {
     return await this.userDataSource.query(query);
   }
 
-  findOne(userIdentifier: string): any {
-    return 'encontrar apeas um user' + userIdentifier;
+  async findOne(userIdentifier: string): Promise<User> {
+    try {
+      // verify if identifier is UUID -> if it doesn`t so we use cpf as the unique identifier
+      const query = `
+     SELECT * FROM ${this.tb_users}
+     WHERE id = $1;
+    `;
+
+      return await this.userDataSource.query(query, [userIdentifier]);
+    } catch (error) {
+      console.error(error);
+      return error;
+    }
+  }
+
+  async findByCpf(cpf: string): Promise<User> {
+    try {
+      const query = `
+     SELECT * FROM ${this.tb_users}
+     WHERE cpf = $1;
+    `;
+      return await this.userDataSource.query(query, [cpf]);
+    } catch (error) {
+      console.error(error);
+      return error;
+    }
   }
 
   // creae an user > user have one account -> one account can make multiple transactions
   async RegisterUser(user: Partial<User>): Promise<User> {
     return await this.userDataSource.save(user);
   }
+
+  async updateUser(user: Partial<User>): Promise<UpdateResult> {
+    try {
+      return await this.userDataSource
+        .createQueryBuilder()
+        .update(UserEntity)
+        .set(user)
+        .where('id = :id', { id: user.id })
+        .execute();
+    } catch (error) {
+      console.error(error);
+      return error;
+    }
+  }
+
   // create an user account -> we need account configurations
   async createAccount(userId: string, account: Partial<Account>) {
-    account.user_id = userId;
-    return await this.accountDataSource.createAccount(account);
+    try {
+      account.user_id = userId;
+      return await this.accountDataSource.createAccount(account);
+    } catch (error) {
+      console.error(error);
+    }
   }
-  // user can make deposits on his account
-  // if an acction is running the deposit needs to wait 'till it ends
-  async deposit(userId: number, accountNumber: number, value: number) {
-    return await this.accountDataSource.deposit({
-      userId,
-      accountNumber,
-      value,
-    });
+
+  async deleteUser(userId: string) {
+    try {
+      await this.userDataSource
+        .createQueryBuilder()
+        .delete()
+        .from(UserEntity)
+        .where('id = :id', { userId })
+        .execute();
+    } catch (error) {
+      console.error(error);
+    }
   }
 }
