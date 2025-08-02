@@ -13,7 +13,7 @@ export class CreateTableTransaction1752935614586 implements MigrationInterface {
           "done_at" TIMESTAMP DEFAULT CURRENT_TIMESTAMP(6),
           "finished_at" TIMESTAMP,
           CONSTRAINT from_account_number_fk FOREIGN KEY (from_account) REFERENCES tb_accounts(account_number),
-          CONSTRAINT to_account_number_fk FOREIGN KEY (to_account) REFERENCES tb_account(account_number)
+          CONSTRAINT to_account_number_fk FOREIGN KEY (to_account) REFERENCES tb_accounts(account_number)
         );
     `);
   }

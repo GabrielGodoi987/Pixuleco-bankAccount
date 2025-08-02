@@ -5,22 +5,23 @@ import {
   Entity,
   JoinColumn,
   ManyToOne,
+  OneToMany,
   OneToOne,
   PrimaryGeneratedColumn,
 } from 'typeorm';
-import { Users } from './user.entity';
-import { Transactions } from './transaction.entity';
+import { UserEntity } from './user.entity';
+import { TransactionEntity } from './transaction.entity';
 
 @Entity('tb_account')
-export class Accounts {
+export class AccountEntity {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
-  @OneToOne(() => Users)
+  @OneToOne(() => UserEntity)
   @JoinColumn({
     name: 'user_id',
   })
-  user: Users;
+  user: UserEntity;
 
   @Column({
     type: 'int',
@@ -42,11 +43,20 @@ export class Accounts {
   })
   updated_at: string;
 
-  @ManyToOne(() => Transactions, (transactions) => transactions.from_account)
-  transferences: Transactions[];
+  @JoinColumn({
+    name: 'user_id',
+  })
+  @ManyToOne(() => UserEntity, (user) => user.accounts)
+  user_id: string;
 
-  @ManyToOne(() => Transactions, (transactions) => transactions.to_account)
-  incomingTransferences: Transactions[];
+  @OneToMany(
+    () => TransactionEntity,
+    (transactions) => transactions.from_account,
+  )
+  transferences: TransactionEntity[];
+
+  @ManyToOne(() => TransactionEntity, (transactions) => transactions.to_account)
+  incomingTransferences: TransactionEntity[];
 
   @BeforeInsert()
   generateRandomValue() {

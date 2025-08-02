@@ -1,12 +1,14 @@
 import {
   Column,
   Entity,
+  OneToMany,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
+import { AccountEntity } from './account.entity';
 
 @Entity('tb_user')
-export class Users {
+export class UserEntity {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
@@ -46,4 +48,7 @@ export class Users {
     type: 'timestamp',
   })
   updated_at: string;
+
+  @OneToMany(() => AccountEntity, (ac) => ac.user_id)
+  accounts: AccountEntity[];
 }

@@ -7,22 +7,22 @@ import {
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
-import { Accounts } from './account.entity';
+import { AccountEntity } from './account.entity';
 import { TransactionStatus } from '../enums/transaction-status.enum';
 import { FailureReason } from '../enums/failure-reason.enum';
 
 @Entity('tb_transactions')
-export class Transactions {
+export class TransactionEntity {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
-  @ManyToOne(() => Accounts)
+  @ManyToOne(() => AccountEntity)
   @JoinColumn({ name: 'from_account', referencedColumnName: 'account_number' })
-  from_account: Accounts;
+  from_account: AccountEntity;
 
-  @ManyToOne(() => Accounts)
+  @ManyToOne(() => AccountEntity)
   @JoinColumn({ name: 'to_account', referencedColumnName: 'account_number' })
-  to_account: Accounts;
+  to_account: AccountEntity;
 
   @Column({
     type: 'float',
