@@ -67,8 +67,8 @@ export class UserRepository {
   async findByCpf(cpf: string): Promise<User> {
     try {
       const query = `
-     SELECT * FROM ${this.tb_users}
-     WHERE cpf = $1;
+     SELECT * FROM ${this.tb_users} as u
+     WHERE u.Cpf = $1;
     `;
       return await this.userDataSource.query(query, [cpf]);
     } catch (error) {

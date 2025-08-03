@@ -9,7 +9,7 @@ import { ResponseUserDto } from './dto/response.user.dto';
 
 @Injectable()
 export class UserService {
-  constructor(private readonly userRepository: UserRepository) { }
+  constructor(private readonly userRepository: UserRepository) {}
   async create(createUserDto: CreateUserDto) {
     const { document } = createUserDto;
     const user = await this.userRepository.findByCpf(document);
@@ -57,7 +57,6 @@ export class UserService {
     if (!user) {
       throw new BadRequestException('User not found');
     }
-
     return user;
   }
 

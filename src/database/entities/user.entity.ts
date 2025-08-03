@@ -7,7 +7,7 @@ import {
 } from 'typeorm';
 import { AccountEntity } from './account.entity';
 
-@Entity('tb_user')
+@Entity('tb_users')
 export class UserEntity {
   @PrimaryGeneratedColumn('uuid')
   id: string;
@@ -26,6 +26,7 @@ export class UserEntity {
   @Column({
     type: 'varchar',
     unique: true,
+    name: 'Cpf',
   })
   cpf: string;
 

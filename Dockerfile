@@ -16,7 +16,7 @@ RUN npm install
 #Test layer
 FROM builder AS test
 
-COPY ./testentrypoint.sh /entrypoint.sh
+COPY ./entrypoint.sh /entrypoint.sh
 
 # give the necessary permissions to the entrypoint file
 RUN chmod +x /entrypoint.sh
