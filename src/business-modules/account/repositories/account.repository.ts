@@ -3,6 +3,8 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { AccountEntity } from 'src/database/entities/account.entity';
 import { Repository } from 'typeorm';
 import { Account } from '../etities/account.entity';
+import { TransactionsRepository } from './transaction.repository';
+import { TransactionEntity } from 'src/database/entities/transaction.entity';
 
 @Injectable()
 export class AccountRepository {
@@ -11,21 +13,29 @@ export class AccountRepository {
   constructor(
     @InjectRepository(AccountEntity)
     private readonly accountDataSource: Repository<AccountEntity>,
+
+    @InjectRepository(TransactionsRepository)
+    private readonly transactionDataSource: Repository<TransactionEntity>,
   ) {}
 
   //
   async findAllAccountStateMentPaginated({
     offset,
     limit,
+    account_number,
+    user_id,
   }: {
     offset: number;
     limit: number;
+    account_number: number;
+    user_id: string;
   }) {
     try {
       const query = `
       SELECT
        t.amount,
        t.status,
+       TO_CHAR(t.done_at, 'DD/MM/YYYY - HH24:MI:SS')
        TO_CHAR(t.finished_at, 'DD/MM/YYYY - HH24:MI:SS'),
        t.to_account
        acc.account_number
@@ -33,11 +43,17 @@ export class AccountRepository {
       INNER JOIN ${this.tableTransaction} as t
        ON acc.account_number = t.from_account
       where t.finished_at < CURRENT_TIMESTAMP
+        AND acc.account_number = $3 AND acc.user_id = $4
       ORDER BY t.finished_at DESC
       OFFSET $1 LIMIT $2; 
     `;
 
-      return this.accountDataSource.query(query, [offset, limit]);
+      return this.accountDataSource.query(query, [
+        offset,
+        limit,
+        account_number,
+        user_id,
+      ]);
     } catch (error) {
       console.error(error);
       return error;
@@ -46,16 +62,38 @@ export class AccountRepository {
 
   // -> transferencias, saques e muito  mais!
   // podemos listar todas as transferencias e sques que ja foram feitas
-  async countAccountStateMent() {}
+  async countAccountStateMent(account_number: number) {
+    const query = `
+     SELECT COUNT(*) FROM ${this.tableTransaction} t
+     WHERE t.from_account = $1
+       AND t.finished_at < CURRENT_TIMESTAMP;
+    `;
+
+    return await this.transactionDataSource.query(query, [account_number]);
+  }
+
+  async findByAccountNumber(account_number: number): Promise<Account> {
+    try {
+      const query = `
+    SELECT * FROM ${this.tableAccounts} as acc
+    WHERE acc.account_number = $1;
+    `;
+
+      return await this.accountDataSource.query(query, [account_number]);
+    } catch (error) {
+      console.error(error);
+      return error;
+    }
+  }
 
   // create account
   async createAccount(account: Partial<Account>) {
     return await this.accountDataSource.save(account);
   }
 
-  async updateAccount(account: Account) {
+  async updateAccount(account: Partial<Account>) {
     try {
-      return this.accountDataSource.update(account.id, account);
+      return this.accountDataSource.update(account.id ?? '', account);
     } catch (error) {
       console.error(error);
       return error;

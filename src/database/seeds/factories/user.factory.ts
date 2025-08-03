@@ -12,7 +12,7 @@ export async function userFactory({
   const userRepository = datasource.getRepository(UserEntity);
   await userRepository.deleteAll();
 
-  if (!quantity) {
+  if (!quantity || quantity == 0) {
     quantity = 5;
   }
 

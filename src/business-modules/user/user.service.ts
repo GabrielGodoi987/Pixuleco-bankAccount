@@ -60,6 +60,14 @@ export class UserService {
     return user;
   }
 
+  async findByCpf(cpf: string): Promise<UserEntity> {
+    const userExists = await this.findByCpf(cpf);
+    if (!userExists) {
+      throw new BadRequestException('User not found');
+    }
+    return userExists;
+  }
+
   async update(id: string, updateUserDto: UpdateUserDto) {
     const user = await this.findOne(id);
     const { document } = updateUserDto;

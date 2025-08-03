@@ -6,7 +6,7 @@ const datasource = new DataSource(dataSourceOptions);
 
 async function runSeed() {
   await datasource.initialize();
-  await userFactory({ datasource, quantity: 1000 });
+  await userFactory({ datasource, quantity: 10 });
 }
 
 runSeed()

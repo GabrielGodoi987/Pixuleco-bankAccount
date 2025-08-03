@@ -48,8 +48,9 @@ export class UserRepository {
     try {
       // verify if identifier is UUID -> if it doesn`t so we use cpf as the unique identifier
       const query = `
-     SELECT * FROM ${this.tb_users}
-     WHERE id = $1;
+        SELECT * FROM ${this.tb_users} as u
+        INNER JOIN tb_accounts as acc ON u.id = acc.user_id 
+        WHERE id = $1;
     `;
 
       return await this.userDataSource.query(query, [userIdentifier]);
