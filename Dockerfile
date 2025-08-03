@@ -11,6 +11,9 @@ WORKDIR /http/app
 # COPY all the directories and files from the host machine to the container
 COPY . .
 
+# Copy the package json into the project
+COPY package*.json ./
+
 RUN npm install
 
 #Test layer

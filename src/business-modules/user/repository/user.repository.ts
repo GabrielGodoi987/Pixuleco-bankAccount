@@ -23,19 +23,14 @@ export class UserRepository {
     offset: number;
     limit: number;
   }): Promise<User[]> {
-    // offset e limit -> retorna a quantidade de itens
-    // count -> para sabermos quantas páginas nós temos
-    // offset = página atual em que estamos
-    // next page = offset + 1 (se offset == count, então nextpage = null)
-    // previous page = offset - 1(se offset == 1 ou 0, então previous = null)
     const query = `
       SELECT
-      name,
-      email,
-      cpf,
-      TO_CHAR(birth_date, 'DD/MM/YYYY - HH24:MI:SS'),
-      TO_CHAR(created_at, 'DD/MM/YYYY - HH24:MI:SS'),
-      updated_at
+      "name",
+      "email",
+      "Cpf",
+      TO_CHAR("birth_date", 'DD/MM/YYYY - HH24:MI:SS'),
+      TO_CHAR("created_at", 'DD/MM/YYYY - HH24:MI:SS'),
+      TO_CAR("updated_at", DD/MM/YYYY - HH24:MI:SS)
       FROM ${this.tb_users}
       OFFSET $1 LIMIT $2;
     `;
