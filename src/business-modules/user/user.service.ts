@@ -11,12 +11,10 @@ import { ResponseUserDto } from './dto/response.user.dto';
 export class UserService {
   constructor(private readonly userRepository: UserRepository) {}
   async create(createUserDto: CreateUserDto) {
-    const { document } = createUserDto;
-    const user = await this.userRepository.findByCpf(document);
+    const { cpf } = createUserDto;
+    const user = await this.userRepository.findByCpf(cpf);
     if (user) {
-      throw new BadRequestException(
-        `user with cpf: ${document} already exists`,
-      );
+      throw new BadRequestException(`user with cpf: ${cpf} already exists`);
     }
     // TODO: criamos uma conta padrao para o usuario, caso ele queira
     // TODO: criamos o usuario
@@ -70,9 +68,9 @@ export class UserService {
 
   async update(id: string, updateUserDto: UpdateUserDto) {
     const user = await this.findOne(id);
-    const { document } = updateUserDto;
-    if (user.cpf !== document) {
-      throw new BadRequestException('User sent a different document!');
+    const { cpf } = updateUserDto;
+    if (user.cpf !== cpf) {
+      throw new BadRequestException('User sent a different cpf!');
     }
 
     return await this.userRepository.updateUser({

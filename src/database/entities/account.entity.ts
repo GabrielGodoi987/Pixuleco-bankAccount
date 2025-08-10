@@ -11,6 +11,8 @@ import {
 } from 'typeorm';
 import { UserEntity } from './user.entity';
 import { TransactionEntity } from './transaction.entity';
+import { AccountType } from '../../business-modules/account/enums/accountType.enum';
+import { AccountStatus } from '../../business-modules/account/enums/accountStatus.enum';
 
 @Entity('tb_account')
 export class AccountEntity {
@@ -32,6 +34,18 @@ export class AccountEntity {
     type: 'bigint',
   })
   account_number: number;
+
+  @Column({
+    type: 'int',
+    name: 'status',
+  })
+  status: AccountStatus;
+
+  @Column({
+    type: 'int',
+    name: 'type',
+  })
+  type: AccountType;
 
   @CreateDateColumn({
     type: 'timestamp',

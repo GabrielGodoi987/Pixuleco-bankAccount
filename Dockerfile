@@ -16,8 +16,8 @@ COPY package*.json ./
 
 RUN npm install
 
-#Test layer
-FROM builder AS test
+#Dev layer
+FROM builder AS dev
 
 COPY ./entrypoint.sh /entrypoint.sh
 

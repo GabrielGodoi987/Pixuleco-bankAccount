@@ -22,7 +22,7 @@ export class CreateUserDto {
   @IsNotEmpty()
   @IsString()
   @Length(10, 14)
-  document: string;
+  cpf: string;
 
   @ApiProperty()
   @IsNotEmpty()

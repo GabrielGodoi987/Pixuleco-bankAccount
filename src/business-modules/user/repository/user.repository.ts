@@ -22,7 +22,7 @@ export class UserRepository {
   }: {
     offset: number;
     limit: number;
-  }): Promise<User[]> {
+  }): Promise<any[]> {
     const query = `
       SELECT
       "name",
@@ -30,18 +30,17 @@ export class UserRepository {
       "Cpf",
       TO_CHAR("birth_date", 'DD/MM/YYYY - HH24:MI:SS'),
       TO_CHAR("created_at", 'DD/MM/YYYY - HH24:MI:SS'),
-      TO_CAR("updated_at", DD/MM/YYYY - HH24:MI:SS)
+      TO_CHAR("updated_at", 'DD/MM/YYYY - HH24:MI:SS')
       FROM ${this.tb_users}
       OFFSET $1 LIMIT $2;
     `;
-
     return await this.userDataSource.query(query, [offset, limit]);
   }
 
   async countUsers(): Promise<number> {
     const query = `SELECT COUNT(*) FROM ${this.tb_users}`;
-
-    return await this.userDataSource.query(query);
+    const [{ count }] = await this.userDataSource.query(query);
+    return count;
   }
 
   async findOne(userIdentifier: string): Promise<User> {
@@ -60,13 +59,15 @@ export class UserRepository {
     }
   }
 
-  async findByCpf(cpf: string): Promise<User> {
+  async findByCpf(cpf: string): Promise<UserEntity> {
     try {
-      const query = `
-     SELECT * FROM ${this.tb_users} as u
-     WHERE u.Cpf = $1;
-    `;
-      return await this.userDataSource.query(query, [cpf]);
+      const data = await this.userDataSource.findOne({
+        where: {
+          cpf,
+        },
+      });
+
+      return data as UserEntity;
     } catch (error) {
       console.error(error);
       return error;

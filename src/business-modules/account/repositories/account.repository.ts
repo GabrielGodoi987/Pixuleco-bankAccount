@@ -1,10 +1,9 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { AccountEntity } from 'src/database/entities/account.entity';
+import { AccountEntity } from '../../../database/entities/account.entity';
 import { Repository } from 'typeorm';
 import { Account } from '../etities/account.entity';
-import { TransactionsRepository } from './transaction.repository';
-import { TransactionEntity } from 'src/database/entities/transaction.entity';
+import { TransactionEntity } from '../../../database/entities/transaction.entity';
 
 @Injectable()
 export class AccountRepository {
@@ -14,7 +13,7 @@ export class AccountRepository {
     @InjectRepository(AccountEntity)
     private readonly accountDataSource: Repository<AccountEntity>,
 
-    @InjectRepository(TransactionsRepository)
+    @InjectRepository(TransactionEntity)
     private readonly transactionDataSource: Repository<TransactionEntity>,
   ) {}
 
@@ -29,7 +28,7 @@ export class AccountRepository {
     limit: number;
     account_number: number;
     user_id: string;
-  }) {
+  }): Promise<any[]> {
     try {
       const query = `
       SELECT
@@ -37,8 +36,20 @@ export class AccountRepository {
        t.status,
        TO_CHAR(t.done_at, 'DD/MM/YYYY - HH24:MI:SS')
        TO_CHAR(t.finished_at, 'DD/MM/YYYY - HH24:MI:SS'),
-       t.to_account
-       acc.account_number
+       t.to_account,
+       t.from_account,
+       acc.account_number,
+       CASE
+         WHEN acc.status == 1 THEN 'Conta ativa'
+         WHEN acc.status == 2 THEN 'Conta desativada'
+         WHEN acc.status == 3 THEN 'Conta recém criada'
+         WHEN acc.status == 4 THEN 'Conta cancelada'
+       END as account_status,
+       CASE
+         WHEN acc.type == 1 THEN 'Conta corrente'
+         WHEN acc.type == 2 THEN 'Conta poupança'
+         WHEN acc.type == 3 THEN 'Conta salário'
+       END as account_type
       FROM ${this.tableAccounts} as acc
       INNER JOIN ${this.tableTransaction} as t
        ON acc.account_number = t.from_account
@@ -62,14 +73,16 @@ export class AccountRepository {
 
   // -> transferencias, saques e muito  mais!
   // podemos listar todas as transferencias e sques que ja foram feitas
-  async countAccountStateMent(account_number: number) {
+  async countAccountStateMent(account_number: number): Promise<number> {
     const query = `
      SELECT COUNT(*) FROM ${this.tableTransaction} t
      WHERE t.from_account = $1
        AND t.finished_at < CURRENT_TIMESTAMP;
     `;
-
-    return await this.transactionDataSource.query(query, [account_number]);
+    const [{ count }] = await this.transactionDataSource.query(query, [
+      account_number,
+    ]);
+    return count;
   }
 
   async findByAccountNumber(account_number: number): Promise<Account> {
@@ -117,7 +130,7 @@ export class AccountRepository {
     value: number;
     accountNumber: number;
     userId: number;
-  }) {
+  }): Promise<{ message: string; success: boolean }> {
     try {
       const query = `
      UPDATE ${this.tableAccounts} as acc
@@ -125,8 +138,47 @@ export class AccountRepository {
      WHERE acc.account_number = $2 and acc.user_id = $3;
     `;
       await this.accountDataSource.query(query, [value, accountNumber, userId]);
+
+      return {
+        message: 'Transaction succesfuly done',
+        success: true,
+      };
     } catch (error) {
       console.error(error);
+      return error;
+    }
+  }
+
+  async withDrawMoney({
+    user_id,
+    account_number,
+    value,
+  }: {
+    user_id: string;
+    account_number: number;
+    value: number;
+  }) {
+    try {
+      const query = `
+     UPDATE ${this.tableAccounts} acc
+     SET acc.credit = acc.credit - $3
+     WHERE acc.user_id = $1 
+      AND acc.account_number = $2;
+    `;
+
+      await this.accountDataSource.query(query, [
+        user_id,
+        account_number,
+        value,
+      ]);
+
+      return await this.accountDataSource.findOne({
+        where: {
+          account_number,
+        },
+      });
+    } catch (error) {
+      console.log(error);
       return error;
     }
   }
