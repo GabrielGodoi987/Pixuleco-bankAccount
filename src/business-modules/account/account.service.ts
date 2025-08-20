@@ -10,6 +10,7 @@ import { CreateAccountDto } from './dto/create-account.dto';
 import { UpdateAccountDto } from './dto/update-account.dto';
 import { UserService } from '../user/user.service';
 import { plainToInstance } from 'class-transformer';
+import { AccountEntity } from 'src/database/entities/account.entity';
 
 @Injectable()
 export class AccountService {
@@ -86,11 +87,8 @@ export class AccountService {
     // Based on this, they can create a new account; otherwise, they cannot.
 
     createAccount.user_id = alreadyHaveAnAccount.id;
-
-    const maptDtoToEntity = plainToInstance(Account, createAccount);
-
-    console.log(JSON.stringify(maptDtoToEntity, null, 2));
-    return this.accountRepository.createAccount(maptDtoToEntity);
+    const accountNumber = this.generateRandomValue();
+    return this.accountRepository.createAccount({...createAccount, accountNumber});
   }
 
   async updateAccount(account_number: number, updateAccount: UpdateAccountDto) {
@@ -160,5 +158,9 @@ export class AccountService {
       account_number: account.account_number,
       value,
     });
+  }
+
+  private generateRandomValue() {
+    return Math.floor(100000 + Math.random() * 9000000000);
   }
 }

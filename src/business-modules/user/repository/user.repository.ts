@@ -5,6 +5,7 @@ import { Repository, UpdateResult } from 'typeorm';
 import { User } from '../entities/user.entity';
 import { Account } from 'src/business-modules/account/etities/account.entity';
 import { AccountRepository } from 'src/business-modules/account/repositories/account.repository';
+import { AccountType } from 'src/business-modules/account/enums/accountType.enum';
 
 @Injectable()
 export class UserRepository {
@@ -43,16 +44,17 @@ export class UserRepository {
     return count;
   }
 
-  async findOne(userIdentifier: string): Promise<User> {
+  async findOne(userIdentifier: string) {
     try {
       // verify if identifier is UUID -> if it doesn`t so we use cpf as the unique identifier
-      const query = `
-        SELECT * FROM ${this.tb_users} as u
-        INNER JOIN tb_accounts as acc ON u.id = acc.user_id 
-        WHERE id = $1;
-    `;
-
-      return await this.userDataSource.query(query, [userIdentifier]);
+      return await this.userDataSource.findOne({
+        where: {
+          id: userIdentifier
+        },
+        relations: {
+          accounts: true,
+        }
+      })
     } catch (error) {
       console.error(error);
       return error;
@@ -87,16 +89,6 @@ export class UserRepository {
     } catch (error) {
       console.error(error);
       return error;
-    }
-  }
-
-  // create an user account -> we need account configurations
-  async createAccount(userId: string, account: Partial<Account>) {
-    try {
-      account.user_id = userId;
-      return await this.accountDataSource.createAccount(account);
-    } catch (error) {
-      console.error(error);
     }
   }
 

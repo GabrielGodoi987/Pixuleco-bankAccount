@@ -5,9 +5,9 @@ export class CreateTableTransaction1752935614586 implements MigrationInterface {
     await queryRunner.query(`
         CREATE TABLE tb_transactions(
           "id" UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
-          "amount" FLOAT NOT NULL,
-          "from_account" INT NOT NULL,
-          "to_account" INT NOT NULL,
+          "amount" NUMERIC(10,2) NOT NULL,
+          "from_account" BIGINT NOT NULL,
+          "to_account" BIGINT NOT NULL,
           "status" INT NOT NULL DEFAULT 2,
           "failure_reason" INT,
           "done_at" TIMESTAMP DEFAULT CURRENT_TIMESTAMP(6),

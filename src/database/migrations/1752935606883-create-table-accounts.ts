@@ -5,13 +5,13 @@ export class CreateTableAccounts1752935606883 implements MigrationInterface {
     await queryRunner.query(`
       CREATE TABLE tb_accounts(
         "id" UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
-        "user_id" UUID UNIQUE NOT NULL,
+        "user_id" UUID NOT NULL,
         "credit" NUMERIC(10, 2) DEFAULT 0,
         "account_number" BIGINT UNIQUE,
         "status" INT DEFAULT 3,
-        "type" INT NOT NULL 1,
+        "type" INT DEFAULT 1,
         "created_at" TIMESTAMP DEFAULT CURRENT_TIMESTAMP(6),
-        "update_at" TIMESTAMP DEFAULT CURRENT_TIMESTAMP(6),
+        "updated_at" TIMESTAMP DEFAULT CURRENT_TIMESTAMP(6),
         CONSTRAINT user_id_fk FOREIGN KEY (user_id) REFERENCES tb_users(id),
         CONSTRAINT chk_account_number CHECK (account_number >= 100000 AND account_number <= 9999999999)
       );

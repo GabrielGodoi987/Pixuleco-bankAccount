@@ -8,6 +8,7 @@ import {
   OneToMany,
   OneToOne,
   PrimaryGeneratedColumn,
+  UpdateDateColumn,
 } from 'typeorm';
 import { UserEntity } from './user.entity';
 import { TransactionEntity } from './transaction.entity';
@@ -19,16 +20,13 @@ export class AccountEntity {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
-  @OneToOne(() => UserEntity)
-  @JoinColumn({
-    name: 'user_id',
-  })
-  user: UserEntity;
-
   @Column({
-    type: 'int',
+    type: 'decimal',
+    precision: 10,
+    scale: 2,
+    default: 0 
   })
-  credit: number;
+  credit: string;
 
   @Column({
     type: 'bigint',
@@ -52,7 +50,7 @@ export class AccountEntity {
   })
   created_at: string;
 
-  @Column({
+  @UpdateDateColumn({
     type: 'timestamp',
   })
   update_at: string;
@@ -61,7 +59,7 @@ export class AccountEntity {
     name: 'user_id',
   })
   @ManyToOne(() => UserEntity, (user) => user.accounts)
-  user_id: string;
+  user: UserEntity;
 
   @OneToMany(
     () => TransactionEntity,
@@ -71,9 +69,4 @@ export class AccountEntity {
 
   @OneToMany(() => TransactionEntity, (transactions) => transactions.to_account)
   incomingTransferences: TransactionEntity[];
-
-  @BeforeInsert()
-  generateRandomValue() {
-    this.account_number = Math.floor(100000 + Math.random() * 9000000000);
-  }
 }

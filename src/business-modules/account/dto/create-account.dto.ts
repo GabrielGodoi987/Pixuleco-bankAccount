@@ -2,13 +2,8 @@ import { ApiProperty } from '@nestjs/swagger';
 import { IsEnum, IsNotEmpty, IsOptional, IsString } from 'class-validator';
 import { AccountType } from '../enums/accountType.enum';
 
-export class CreateAccountDto {
-  @ApiProperty()
-  @IsString()
-  @IsOptional()
-  id: string;
-
-  @ApiProperty()
+export class CreateAccountDto {   
+  @ApiProperty({description: 'Id from an existent user'})
   @IsOptional()
   user_id: string;
 

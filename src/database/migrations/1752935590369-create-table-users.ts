@@ -9,8 +9,8 @@ export class CreateTableUsers1752935590369 implements MigrationInterface {
          "name" VARCHAR(50) NOT NULL,
          "email" VARCHAR(100) NOT NULL UNIQUE,
          "cpf" VARCHAR(14) NOT NULL UNIQUE,
-         "password" VARCHAR(10) NOT NULL,
-         "birth_date" TIMESTAMP NOT NULL,
+         "password" VARCHAR(255) NOT NULL,
+         "birth_date" DATE NOT NULL,
          "created_at" TIMESTAMP DEFAULT CURRENT_TIMESTAMP(6),
          "updated_at" TIMESTAMP DEFAULT CURRENT_TIMESTAMP(6)
         );

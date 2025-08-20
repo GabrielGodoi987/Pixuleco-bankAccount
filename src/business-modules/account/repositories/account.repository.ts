@@ -4,6 +4,8 @@ import { AccountEntity } from '../../../database/entities/account.entity';
 import { Repository } from 'typeorm';
 import { Account } from '../etities/account.entity';
 import { TransactionEntity } from '../../../database/entities/transaction.entity';
+import { AccountType } from '../enums/accountType.enum';
+import { AccountStatus } from '../enums/accountStatus.enum';
 
 @Injectable()
 export class AccountRepository {
@@ -88,8 +90,8 @@ export class AccountRepository {
   async findByAccountNumber(account_number: number): Promise<Account> {
     try {
       const query = `
-    SELECT * FROM ${this.tableAccounts} as acc
-    WHERE acc.account_number = $1;
+      SELECT * FROM ${this.tableAccounts} as acc
+      WHERE acc.account_number = $1;
     `;
 
       return await this.accountDataSource.query(query, [account_number]);
@@ -100,13 +102,19 @@ export class AccountRepository {
   }
 
   // create account
-  async createAccount(account: Partial<Account>) {
-    return await this.accountDataSource.save(account);
+  async createAccount(account: {type: AccountType, user_id: string, accountNumber: number}) {
+    const {type, user_id, accountNumber} = account;
+    console.log(account);
+    return await this.accountDataSource.save({
+      type,
+      user_id,
+      account_number: accountNumber
+    });
   }
 
-  async updateAccount(account: Partial<Account>) {
+  async updateAccount(account: Account) {
     try {
-      return this.accountDataSource.update(account.id ?? '', account);
+      return this.accountDataSource.update(account.id, account);
     } catch (error) {
       console.error(error);
       return error;
