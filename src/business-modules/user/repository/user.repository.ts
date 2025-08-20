@@ -59,17 +59,14 @@ export class UserRepository {
     }
   }
 
-  async findByCpf(cpf: string): Promise<UserEntity> {
+  async findByCpf(cpf: string): Promise<UserEntity | null> {
     try {
-      const data = await this.userDataSource.findOne({
+      return await this.userDataSource.findOne({
         where: {
           cpf,
         },
       });
-
-      return data as UserEntity;
     } catch (error) {
-      console.error(error);
       return error;
     }
   }

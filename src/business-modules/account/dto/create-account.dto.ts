@@ -1,13 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
-import {
-  IsEnum,
-  IsNotEmpty,
-  IsOptional,
-  IsString,
-  IsUUID,
-} from 'class-validator';
+import { IsEnum, IsNotEmpty, IsOptional, IsString } from 'class-validator';
 import { AccountType } from '../enums/accountType.enum';
-import { Account } from '../etities/account.entity';
 
 export class CreateAccountDto {
   @ApiProperty()
@@ -16,12 +9,11 @@ export class CreateAccountDto {
   id: string;
 
   @ApiProperty()
-  @IsNotEmpty()
-  @IsUUID()
+  @IsOptional()
   user_id: string;
 
-  @ApiProperty()
+  @ApiProperty({ default: 1 })
   @IsEnum(AccountType)
   @IsNotEmpty()
-  type: Account;
+  type: AccountType;
 }

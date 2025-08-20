@@ -6,6 +6,7 @@ import { UserEntity } from 'src/database/entities/user.entity';
 import { PaginatedResponse } from 'src/commons/interfaces/PaginatedResponse';
 import { plainToInstance } from 'class-transformer';
 import { ResponseUserDto } from './dto/response.user.dto';
+import { User } from './entities/user.entity';
 
 @Injectable()
 export class UserService {
@@ -41,7 +42,7 @@ export class UserService {
         current: offset,
         next: offset !== countUsers ? offset + 1 : null,
         previous: offset === 0 ? null : offset - 1,
-        totalPages: countUsers,
+        totalPages: Math.ceil(limit / countUsers),
         items: responseUser,
       };
     } catch (error) {
@@ -58,8 +59,9 @@ export class UserService {
     return user;
   }
 
-  async findByCpf(cpf: string): Promise<UserEntity> {
-    const userExists = await this.findByCpf(cpf);
+  async findByCpf(cpf: string): Promise<User> {
+    console.log(cpf);
+    const userExists = await this.userRepository.findByCpf(cpf);
     if (!userExists) {
       throw new BadRequestException('User not found');
     }

@@ -14,7 +14,7 @@ import { TransactionEntity } from './transaction.entity';
 import { AccountType } from '../../business-modules/account/enums/accountType.enum';
 import { AccountStatus } from '../../business-modules/account/enums/accountStatus.enum';
 
-@Entity('tb_account')
+@Entity('tb_accounts')
 export class AccountEntity {
   @PrimaryGeneratedColumn('uuid')
   id: string;
@@ -55,7 +55,7 @@ export class AccountEntity {
   @Column({
     type: 'timestamp',
   })
-  updated_at: string;
+  update_at: string;
 
   @JoinColumn({
     name: 'user_id',
@@ -69,7 +69,7 @@ export class AccountEntity {
   )
   transferences: TransactionEntity[];
 
-  @ManyToOne(() => TransactionEntity, (transactions) => transactions.to_account)
+  @OneToMany(() => TransactionEntity, (transactions) => transactions.to_account)
   incomingTransferences: TransactionEntity[];
 
   @BeforeInsert()

@@ -37,7 +37,7 @@ export class AccountController {
   @ApiOperation({
     summary: 'Create an account for an existent user',
   })
-  @Post('/:user_cpf')
+  @Post(':user_cpf')
   async createAccount(
     @Param('user_cpf') user_cpf: string,
     @Body() createAccountDto: CreateAccountDto,

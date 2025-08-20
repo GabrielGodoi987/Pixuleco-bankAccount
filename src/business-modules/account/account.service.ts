@@ -48,7 +48,7 @@ export class AccountService {
         current: offset,
         next: countAccounntStatement != offset ? offset + 1 : null,
         previous: offset > 0 ? offset + 1 : null,
-        totalPages: countAccounntStatement,
+        totalPages: Math.ceil(limit / countAccounntStatement),
         items: accountStatements,
       };
     } catch (error) {
@@ -75,10 +75,10 @@ export class AccountService {
   }
 
   async createAccount(user_cpf: string, createAccount: CreateAccountDto) {
+    console.log(user_cpf);
     // check if user has one account (we going to see if he has 3 in the future)
     const alreadyHaveAnAccount = await this.userService.findByCpf(user_cpf);
-
-    if (alreadyHaveAnAccount.accounts.length == 1) {
+    if (alreadyHaveAnAccount.accounts !== undefined) {
       throw new ConflictException('User already have an account');
     }
     // We check the account type -> if the user has an account with the same type, they will be blocked.
@@ -89,6 +89,7 @@ export class AccountService {
 
     const maptDtoToEntity = plainToInstance(Account, createAccount);
 
+    console.log(JSON.stringify(maptDtoToEntity, null, 2));
     return this.accountRepository.createAccount(maptDtoToEntity);
   }
 
