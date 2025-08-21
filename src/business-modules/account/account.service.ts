@@ -2,21 +2,28 @@ import {
   BadRequestException,
   ConflictException,
   Injectable,
+  NotFoundException,
 } from '@nestjs/common';
 import { AccountRepository } from './repositories/account.repository';
 import { PaginatedResponse } from 'src/commons/interfaces/PaginatedResponse';
-import { Account } from './etities/account.entity';
 import { CreateAccountDto } from './dto/create-account.dto';
-import { UpdateAccountDto } from './dto/update-account.dto';
 import { UserService } from '../user/user.service';
-import { plainToInstance } from 'class-transformer';
-import { AccountEntity } from 'src/database/entities/account.entity';
+import { DepositDto } from './dto/deposit.dto';
+import { InjectQueue } from '@nestjs/bull';
+import { Queue } from 'bull';
+import { TransactionDto } from './dto/transaction.dto';
 
 @Injectable()
 export class AccountService {
   constructor(
     private readonly accountRepository: AccountRepository,
     private readonly userService: UserService,
+
+    @InjectQueue('deposit-queue')
+    private depositQueue: Queue,
+
+    @InjectQueue('transaction-queue')
+    private transactionQueue: Queue,
   ) {}
 
   async findAllAccountSatement({
@@ -88,20 +95,10 @@ export class AccountService {
 
     createAccount.user_id = alreadyHaveAnAccount.id;
     const accountNumber = this.generateRandomValue();
-    return this.accountRepository.createAccount({...createAccount, accountNumber});
-  }
-
-  async updateAccount(account_number: number, updateAccount: UpdateAccountDto) {
-    const accountExists =
-      await this.accountRepository.findByAccountNumber(account_number);
-    if (!accountExists) {
-      throw new BadRequestException(
-        `Account with ${account_number} wasn't found`,
-      );
-    }
-    updateAccount.id = accountExists.id;
-    const maptDtoToEntity = plainToInstance(Account, updateAccount);
-    return await this.accountRepository.updateAccount(maptDtoToEntity);
+    return this.accountRepository.createAccount({
+      ...createAccount,
+      accountNumber,
+    });
   }
 
   // implement in the future
@@ -129,7 +126,59 @@ export class AccountService {
   // needs a serie of confirmation
   // needs to be processed by a queue -> concurrency = 1
   // needs a lock for this, the next process needs to wait till the other initiate
-  async transaction() {}
+  async transaction(transactionDto: TransactionDto) {
+    const { from_account, to_account } = transactionDto;
+    const [acc1, acc2] = await Promise.all([
+      this.accountRepository.findByAccountNumber(from_account),
+      this.accountRepository.findByAccountNumber(to_account),
+    ]);
+
+    if (!(acc1 || acc2)) {
+      throw new NotFoundException('one of the accounts does not exists');
+    }
+
+    const job = await this.transactionQueue.add(
+      'transacion-processor',
+      transactionDto,
+      {
+        removeOnComplete: true,
+        removeOnFail: true,
+        attempts: 3,
+      },
+    );
+
+    return {
+      id: job.id,
+      timestamp: job.timestamp,
+    };
+  }
+
+  // recebe um depósito
+  // verifica se já tem um em execução
+  // envia para um processor
+  // pega quanto de credit um user tem em conta
+  // faz a devida atualização
+  // salva no banco de dados
+  // envia notificação
+  async deposit(userCpf: string, depositDto: DepositDto) {
+    const user = await this.userService.findByCpf(userCpf);
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+
+    depositDto.user_id = user.id;
+
+    const job = await this.depositQueue.add('deposit-processor', depositDto, {
+      attempts: 3,
+      removeOnComplete: true,
+      removeOnFail: true,
+    });
+
+    return {
+      job_id: job.id,
+      timestamp: job.timestamp,
+    };
+  }
 
   // sacar dinheiro
   // fazemos a query para atualizar a conta e retirar o dinheiro
@@ -158,6 +207,13 @@ export class AccountService {
       account_number: account.account_number,
       value,
     });
+  }
+
+  async deactivateAccount(userCpf: string) {
+    const user = await this.userService.findByCpf(userCpf);
+    if (!user) {
+      throw new NotFoundException('User was not found');
+    }
   }
 
   private generateRandomValue() {

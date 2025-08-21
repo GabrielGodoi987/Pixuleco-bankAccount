@@ -1,4 +1,4 @@
-import { Processor } from '@nestjs/bullmq';
+import { Processor } from '@nestjs/bull';
 
 @Processor('investiment-job')
 export class InvestimentProcessor {}

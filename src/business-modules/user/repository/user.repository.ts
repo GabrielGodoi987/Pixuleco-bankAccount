@@ -3,9 +3,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { UserEntity } from 'src/database/entities/user.entity';
 import { Repository, UpdateResult } from 'typeorm';
 import { User } from '../entities/user.entity';
-import { Account } from 'src/business-modules/account/etities/account.entity';
 import { AccountRepository } from 'src/business-modules/account/repositories/account.repository';
-import { AccountType } from 'src/business-modules/account/enums/accountType.enum';
 
 @Injectable()
 export class UserRepository {
@@ -28,7 +26,7 @@ export class UserRepository {
       SELECT
       "name",
       "email",
-      "Cpf",
+      "cpf",
       TO_CHAR("birth_date", 'DD/MM/YYYY - HH24:MI:SS'),
       TO_CHAR("created_at", 'DD/MM/YYYY - HH24:MI:SS'),
       TO_CHAR("updated_at", 'DD/MM/YYYY - HH24:MI:SS')
@@ -49,12 +47,12 @@ export class UserRepository {
       // verify if identifier is UUID -> if it doesn`t so we use cpf as the unique identifier
       return await this.userDataSource.findOne({
         where: {
-          id: userIdentifier
+          id: userIdentifier,
         },
         relations: {
           accounts: true,
-        }
-      })
+        },
+      });
     } catch (error) {
       console.error(error);
       return error;

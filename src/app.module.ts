@@ -6,9 +6,16 @@ import { UserModule } from './business-modules/user/user.module';
 import { DatabaseModule } from './database/database.module';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { dataSourceOptions } from './database/connection/datasource';
+import { BullModule } from '@nestjs/bull';
 @Module({
   imports: [
     TypeOrmModule.forRoot(dataSourceOptions),
+    BullModule.forRoot({
+      redis: {
+        host: 'redis',
+        port: 6379,
+      },
+    }),
     DatabaseModule,
     UserModule,
     AccountModule,

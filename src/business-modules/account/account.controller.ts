@@ -9,8 +9,9 @@ import {
 } from '@nestjs/common';
 import { AccountService } from './account.service';
 import { CreateAccountDto } from './dto/create-account.dto';
-import { UpdateAccountDto } from './dto/update-account.dto';
 import { ApiOperation } from '@nestjs/swagger';
+import { DepositDto } from './dto/deposit.dto';
+import { TransactionDto } from './dto/transaction.dto';
 
 @Controller('accounts')
 export class AccountController {
@@ -45,20 +46,22 @@ export class AccountController {
     return this.serviceAccount.createAccount(user_cpf, createAccountDto);
   }
 
-  @ApiOperation({
-    summary: 'Update an account based on his account number ',
-  })
-  @Patch(':account_number')
-  async updateAccount(
-    @Param('account_number') account_number: number,
-    @Body() updateAccountDto: UpdateAccountDto,
-  ) {
-    return this.serviceAccount.updateAccount(account_number, updateAccountDto);
+  // precisamos saber para qual conta vai e de qual conta vem
+  @Post('transaction') // precisa de um job para processar os dados
+  async transaction(@Body() transactionDto: TransactionDto) {
+    return await this.serviceAccount.transaction(transactionDto);
   }
 
-  // precisamos saber para qual conta vai e de qual conta vem
-  //@Post('transaction') // precisa de um job para processar os dados
-  //async transaction(@Body() transactionDto: TransactionDto) {}
+  @ApiOperation({
+    summary: "Increase the value into the user's account",
+  })
+  @Patch('/deposit/:user_cpf')
+  async deposit(
+    @Param('user_cpf') userCpf: string,
+    @Body() depositDto: DepositDto,
+  ) {
+    return await this.serviceAccount.deposit(userCpf, depositDto);
+  }
 
   @ApiOperation({
     summary: 'Withdraw money from an existent account',

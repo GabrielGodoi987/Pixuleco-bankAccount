@@ -56,8 +56,8 @@ async function cpfGenerator(dataSource: DataSource): Promise<string> {
 
     const existendCpf = await repository
       .createQueryBuilder('u')
-      .select('u."Cpf"')
-      .where('u."Cpf" = :cpf', { cpf })
+      .select('u."cpf"')
+      .where('u."cpf" = :cpf', { cpf })
       .getOne();
 
     if (!existendCpf) {

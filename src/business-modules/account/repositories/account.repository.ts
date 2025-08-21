@@ -5,7 +5,6 @@ import { Repository } from 'typeorm';
 import { Account } from '../etities/account.entity';
 import { TransactionEntity } from '../../../database/entities/transaction.entity';
 import { AccountType } from '../enums/accountType.enum';
-import { AccountStatus } from '../enums/accountStatus.enum';
 
 @Injectable()
 export class AccountRepository {
@@ -94,7 +93,11 @@ export class AccountRepository {
       WHERE acc.account_number = $1;
     `;
 
-      return await this.accountDataSource.query(query, [account_number]);
+      const [data] = await this.accountDataSource.query(query, [
+        account_number,
+      ]);
+
+      return data;
     } catch (error) {
       console.error(error);
       return error;
@@ -102,19 +105,25 @@ export class AccountRepository {
   }
 
   // create account
-  async createAccount(account: {type: AccountType, user_id: string, accountNumber: number}) {
-    const {type, user_id, accountNumber} = account;
+  async createAccount(account: {
+    type: AccountType;
+    user_id: string;
+    accountNumber: number;
+  }) {
+    const { type, user_id, accountNumber } = account;
     console.log(account);
     return await this.accountDataSource.save({
       type,
-      user_id,
-      account_number: accountNumber
+      user: {
+        id: user_id,
+      },
+      account_number: accountNumber,
     });
   }
 
-  async updateAccount(account: Account) {
+  async updateAccount(accountid: string, account: Partial<Account>) {
     try {
-      return this.accountDataSource.update(account.id, account);
+      return this.accountDataSource.update(accountid, account);
     } catch (error) {
       console.error(error);
       return error;
@@ -137,13 +146,14 @@ export class AccountRepository {
   }: {
     value: number;
     accountNumber: number;
-    userId: number;
+    userId: string;
   }): Promise<{ message: string; success: boolean }> {
     try {
       const query = `
-     UPDATE ${this.tableAccounts} as acc
-     SET acc.credit = acc.credit + $1
-     WHERE acc.account_number = $2 and acc.user_id = $3;
+      UPDATE ${this.tableAccounts}
+      SET credit = $1
+      WHERE account_number = $2
+         AND user_id = $3;
     `;
       await this.accountDataSource.query(query, [value, accountNumber, userId]);
 

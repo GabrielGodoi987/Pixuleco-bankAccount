@@ -10,25 +10,23 @@ export class TransactionsRepository {
     private readonly transactionDataSource: Repository<TransactionEntity>,
   ) {}
 
-  // transaction query creation
-  // we create an transaction in the database
-  // we update account_from credit
-  // we updaten to_account credit
-  // we can notify account from and to account sending emails - tell then that the transaction was successfuly done
   async transaction(transaction: Partial<TransactionEntity>) {
-    try {
-      const data = this.transactionDataSource.create(transaction);
-      await this.transactionDataSource.save(data);
-    } catch (error) {
-      console.error(error);
-      return error;
-    }
+    const data = this.transactionDataSource.create(transaction);
+    await this.transactionDataSource.save(data);
+    return data;
   }
 
-  async updateTransactionField(transaction: DeepPartial<TransactionEntity>) {
+  async updateTransactionField(
+    id: string,
+    transaction: DeepPartial<TransactionEntity>,
+  ) {
     try {
-      const data = this.transactionDataSource.create(transaction);
-      await this.transactionDataSource.save(data);
+      return this.transactionDataSource
+        .createQueryBuilder()
+        .update()
+        .set(transaction)
+        .where('id = :id', { id })
+        .execute();
     } catch (error) {
       console.error(error);
       return error;

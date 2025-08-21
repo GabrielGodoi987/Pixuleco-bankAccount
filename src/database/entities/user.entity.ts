@@ -26,7 +26,7 @@ export class UserEntity {
   @Column({
     type: 'varchar',
     unique: true,
-    name: 'Cpf',
+    name: 'cpf',
   })
   cpf: string;
 
@@ -50,6 +50,6 @@ export class UserEntity {
   })
   updated_at: string;
 
-  @OneToMany(() => AccountEntity, (ac) => ac.user_id)
+  @OneToMany(() => AccountEntity, (ac) => ac.user)
   accounts: AccountEntity[];
 }

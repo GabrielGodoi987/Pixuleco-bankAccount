@@ -1,0 +1,38 @@
+name: pixuleco-test
+services:
+  db:
+    container_name: pixuleco-database
+    image: postgres:17-alpine
+    environment:
+      POSTGRES_PASSWORD: docker
+      POSTGRES_USERNAME: postgres
+      POSTGRES_DB: pixuleco
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U postgres']
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    volumes:
+      - database_volume:/var/lib/postgresql/data
+    ports:
+      - '5432:5432'
+    networks:
+      - pixuleco-network
+
+  redis:
+    container_name: pixuleco-redis-database
+    image: 'redis:7-alpine'
+    ports:
+      - '6379:6379'
+    volumes:
+      - redis_data:/data
+    networks:
+      - pixuleco-network
+
+volumes:
+  database_volume: {}
+  redis_data: {}
+
+networks:
+  pixuleco-network:
+    driver: bridge

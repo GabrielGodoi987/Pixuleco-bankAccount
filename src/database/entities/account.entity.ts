@@ -1,12 +1,10 @@
 import {
-  BeforeInsert,
   Column,
   CreateDateColumn,
   Entity,
   JoinColumn,
   ManyToOne,
   OneToMany,
-  OneToOne,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
@@ -24,7 +22,7 @@ export class AccountEntity {
     type: 'decimal',
     precision: 10,
     scale: 2,
-    default: 0 
+    default: 0,
   })
   credit: string;
 
@@ -53,7 +51,7 @@ export class AccountEntity {
   @UpdateDateColumn({
     type: 'timestamp',
   })
-  update_at: string;
+  updated_at: string;
 
   @JoinColumn({
     name: 'user_id',

@@ -16,13 +16,11 @@ export class TransactionEntity {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
-  @ManyToOne(() => AccountEntity)
   @JoinColumn({ name: 'from_account', referencedColumnName: 'account_number' })
-  from_account: AccountEntity;
+  from_account: number;
 
-  @ManyToOne(() => AccountEntity)
   @JoinColumn({ name: 'to_account', referencedColumnName: 'account_number' })
-  to_account: AccountEntity;
+  to_account: number;
 
   @Column({
     type: 'float',
@@ -49,6 +47,13 @@ export class TransactionEntity {
 
   @UpdateDateColumn({
     type: 'timestamp',
+    nullable: true,
   })
   finished_at: string;
+
+  @ManyToOne(() => AccountEntity)
+  accountFrom: AccountEntity;
+
+  @ManyToOne(() => AccountEntity)
+  accountTo: AccountEntity;
 }

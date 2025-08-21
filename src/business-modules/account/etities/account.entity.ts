@@ -6,7 +6,7 @@ export class Account implements Partial<AccountEntity> {
   id: string;
   type: AccountType;
   user: UserEntity;
-  credit: number;
+  credit: string;
   account_number: number;
   created_at: string;
   update_at: string;
