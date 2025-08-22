@@ -8,6 +8,7 @@ import {
 import { UserModule } from './business-modules/user/user.module';
 import { AccountModule } from './business-modules/account/account.module';
 import { HttpStatus, ValidationPipe } from '@nestjs/common';
+import { AuthModule } from './business-modules/auth/auth.module';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
@@ -23,6 +24,7 @@ async function bootstrap() {
   );
 
   const config = new DocumentBuilder()
+    .addBearerAuth()
     .setTitle('Pixuleco api')
     .setDescription(
       'Project Destinated to learn raw SQL queries, process Queues and master tools daily used',
@@ -32,7 +34,7 @@ async function bootstrap() {
     .build();
 
   const documentOptions: SwaggerDocumentOptions = {
-    include: [UserModule, AccountModule],
+    include: [UserModule, AccountModule, AuthModule],
     deepScanRoutes: true,
     autoTagControllers: true,
   };

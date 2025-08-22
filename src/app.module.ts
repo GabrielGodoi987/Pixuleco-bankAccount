@@ -7,6 +7,7 @@ import { DatabaseModule } from './database/database.module';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { dataSourceOptions } from './database/connection/datasource';
 import { BullModule } from '@nestjs/bull';
+import { AuthModule } from './business-modules/auth/auth.module';
 @Module({
   imports: [
     TypeOrmModule.forRoot(dataSourceOptions),
@@ -19,6 +20,7 @@ import { BullModule } from '@nestjs/bull';
     DatabaseModule,
     UserModule,
     AccountModule,
+    AuthModule,
   ],
   controllers: [AppController],
   providers: [AppService],
