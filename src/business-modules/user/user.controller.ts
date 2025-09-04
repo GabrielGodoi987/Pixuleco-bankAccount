@@ -12,6 +12,7 @@ import { UserService } from './user.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { ApiOperation } from '@nestjs/swagger';
+import { TransformDatePipe } from 'src/commons/pipes/transform-date/transform-date.pipe';
 
 @Controller('user')
 export class UserController {
@@ -20,7 +21,11 @@ export class UserController {
     summary: 'Creates a new user',
   })
   @Post()
-  create(@Body() createUserDto: CreateUserDto) {
+  create(
+    @Body('birth_date', TransformDatePipe) birthDate: string,
+    @Body() createUserDto: CreateUserDto,
+  ) {
+    createUserDto.birth_date = birthDate;
     return this.userService.create(createUserDto);
   }
 

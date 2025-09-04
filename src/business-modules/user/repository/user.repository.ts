@@ -3,7 +3,6 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { UserEntity } from 'src/database/entities/user.entity';
 import { Repository, UpdateResult } from 'typeorm';
 import { User } from '../entities/user.entity';
-import { AccountRepository } from 'src/business-modules/account/repositories/account.repository';
 
 @Injectable()
 export class UserRepository {
@@ -12,7 +11,6 @@ export class UserRepository {
   constructor(
     @InjectRepository(UserEntity)
     private readonly userDataSource: Repository<UserEntity>,
-    private readonly accountDataSource: AccountRepository,
   ) {}
   // find all users
   async findAllPaginated({
@@ -67,6 +65,19 @@ export class UserRepository {
         },
       });
     } catch (error) {
+      return error;
+    }
+  }
+
+  async findUserByEmail(email: string) {
+    try {
+      return await this.userDataSource.findOne({
+        where: {
+          email,
+        },
+      });
+    } catch (error) {
+      console.error(error);
       return error;
     }
   }

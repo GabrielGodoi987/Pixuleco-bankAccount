@@ -16,10 +16,10 @@ export class TransactionEntity {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
-  @JoinColumn({ name: 'from_account', referencedColumnName: 'account_number' })
+  @Column()
   from_account: number;
 
-  @JoinColumn({ name: 'to_account', referencedColumnName: 'account_number' })
+  @Column()
   to_account: number;
 
   @Column({
@@ -51,9 +51,11 @@ export class TransactionEntity {
   })
   finished_at: string;
 
-  @ManyToOne(() => AccountEntity)
+  @ManyToOne(() => AccountEntity, (account) => account.transferences)
+  @JoinColumn({ name: 'from_account', referencedColumnName: 'account_number' })
   accountFrom: AccountEntity;
 
-  @ManyToOne(() => AccountEntity)
+  @ManyToOne(() => AccountEntity, (account) => account.incomingTransferences)
+  @JoinColumn({ name: 'to_account', referencedColumnName: 'account_number' })
   accountTo: AccountEntity;
 }

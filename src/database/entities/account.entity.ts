@@ -28,6 +28,7 @@ export class AccountEntity {
 
   @Column({
     type: 'bigint',
+    unique: true,
   })
   account_number: number;
 
@@ -53,18 +54,15 @@ export class AccountEntity {
   })
   updated_at: string;
 
+  @ManyToOne(() => UserEntity, (user) => user.accounts)
   @JoinColumn({
     name: 'user_id',
   })
-  @ManyToOne(() => UserEntity, (user) => user.accounts)
   user: UserEntity;
 
-  @OneToMany(
-    () => TransactionEntity,
-    (transactions) => transactions.from_account,
-  )
+  @OneToMany(() => TransactionEntity, (t) => t.accountFrom)
   transferences: TransactionEntity[];
 
-  @OneToMany(() => TransactionEntity, (transactions) => transactions.to_account)
+  @OneToMany(() => TransactionEntity, (t) => t.accountTo)
   incomingTransferences: TransactionEntity[];
 }

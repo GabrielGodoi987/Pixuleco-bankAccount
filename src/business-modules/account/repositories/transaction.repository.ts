@@ -13,7 +13,24 @@ export class TransactionsRepository {
   async transaction(transaction: Partial<TransactionEntity>) {
     const data = this.transactionDataSource.create(transaction);
     await this.transactionDataSource.save(data);
-    return data;
+    return await this.transactionDataSource.findOne({
+      where: {
+        id: data.id,
+      },
+      relations: {
+        accountFrom: {
+          user: true,
+        },
+        accountTo: {
+          user: true,
+        },
+      },
+
+      select: {
+        accountFrom: true,
+        accountTo: true,
+      },
+    });
   }
 
   async updateTransactionField(

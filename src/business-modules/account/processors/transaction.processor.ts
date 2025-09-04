@@ -34,8 +34,8 @@ export class TransactionProcessor {
   async process(job: Job<TransactionDto>) {
     const { id, data } = job;
     const { from_account, to_account, value } = data;
-    console.log(data);
     try {
+      await job.progress(0);
       const transaction = await this.transactionRepository.transaction({
         amount: value,
         from_account,
@@ -43,8 +43,14 @@ export class TransactionProcessor {
         status: TransactionStatus.PENDING,
       });
 
+      if (!transaction) {
+        throw new BadRequestException();
+      }
+
       const hasEnoughCredit =
         await this.accountRepository.findByAccountNumber(from_account);
+
+      await job.progress(50);
 
       if (value > Number(hasEnoughCredit.credit)) {
         await this.transactionRepository.updateTransactionField(
@@ -54,21 +60,26 @@ export class TransactionProcessor {
             finished_at: new Date().toISOString(),
           },
         );
+        await job.progress(100);
         throw new BadRequestException('Sender account has no credit enough');
       }
 
       // inicia a transação -> tirar dinheiro de uma conta e passar para outra
+      await job.progress(75);
       await this.accountRepository.withDrawMoney({
         account_number: from_account,
         user_id: transaction.accountFrom.user.id,
         value,
       });
 
+      await job.progress(90);
       await this.accountRepository.deposit({
         value,
         accountNumber: to_account,
         userId: transaction.accountTo.user.id,
       });
+
+      await job.progress(100);
       return {
         id,
         message: 'Transaction successfully done',

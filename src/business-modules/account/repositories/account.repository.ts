@@ -111,7 +111,6 @@ export class AccountRepository {
     accountNumber: number;
   }) {
     const { type, user_id, accountNumber } = account;
-    console.log(account);
     return await this.accountDataSource.save({
       type,
       user: {
@@ -150,8 +149,8 @@ export class AccountRepository {
   }): Promise<{ message: string; success: boolean }> {
     try {
       const query = `
-      UPDATE ${this.tableAccounts}
-      SET credit = $1
+      UPDATE ${this.tableAccounts} acc
+      SET credit = acc.credit + $1
       WHERE account_number = $2
          AND user_id = $3;
     `;
@@ -178,10 +177,11 @@ export class AccountRepository {
   }) {
     try {
       const query = `
-     UPDATE ${this.tableAccounts} acc
-     SET acc.credit = acc.credit - $3
-     WHERE acc.user_id = $1 
-      AND acc.account_number = $2;
+      UPDATE ${this.tableAccounts} acc
+      SET credit = acc.credit - $3
+      WHERE acc.user_id = $1
+        AND acc.account_number = $2
+        AND acc.credit >= $3;
     `;
 
       await this.accountDataSource.query(query, [
@@ -196,7 +196,6 @@ export class AccountRepository {
         },
       });
     } catch (error) {
-      console.log(error);
       return error;
     }
   }

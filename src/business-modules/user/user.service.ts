@@ -7,18 +7,22 @@ import { PaginatedResponse } from 'src/commons/interfaces/PaginatedResponse';
 import { plainToInstance } from 'class-transformer';
 import { ResponseUserDto } from './dto/response.user.dto';
 import { User } from './entities/user.entity';
+import * as bcrypt from 'bcrypt';
 
 @Injectable()
 export class UserService {
   constructor(private readonly userRepository: UserRepository) {}
   async create(createUserDto: CreateUserDto) {
-    const { cpf } = createUserDto;
+    const { cpf, password } = createUserDto;
     const user = await this.userRepository.findByCpf(cpf);
     if (user) {
       throw new BadRequestException(`user with cpf: ${cpf} already exists`);
     }
     // TODO: criamos uma conta padrao para o usuario, caso ele queira
     // TODO: criamos o usuario
+    // hash na password do user
+    const newPassowrd = await bcrypt.hash(password, 16);
+    createUserDto.password = newPassowrd;
     return await this.userRepository.RegisterUser(createUserDto);
   }
 
@@ -52,6 +56,10 @@ export class UserService {
   }
 
   async findOne(id: string): Promise<UserEntity> {
+    // isUuid
+    // isEmail
+    // isCpf
+    // com essas verificações podemos centralizar esse método como findOne com base na entrada
     const user = await this.userRepository.findOne(id);
     if (!user) {
       throw new BadRequestException('User not found');
@@ -59,8 +67,16 @@ export class UserService {
     return user;
   }
 
+  async findByEmail(email: string): Promise<UserEntity> {
+    const userExists = await this.userRepository.findUserByEmail(email);
+    if (!userExists) {
+      throw new BadRequestException('User not found');
+    }
+
+    return userExists;
+  }
+
   async findByCpf(cpf: string): Promise<User> {
-    console.log(cpf);
     const userExists = await this.userRepository.findByCpf(cpf);
     if (!userExists) {
       throw new BadRequestException('User not found');

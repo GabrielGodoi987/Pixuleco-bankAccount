@@ -34,6 +34,8 @@ services:
       context: .
       dockerfile: Dockerfile
       target: dev
+    env_file:
+      - .env
     volumes:
       - .:/http/app
     environment:

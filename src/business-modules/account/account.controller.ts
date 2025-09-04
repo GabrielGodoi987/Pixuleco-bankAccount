@@ -36,6 +36,16 @@ export class AccountController {
   }
 
   @ApiOperation({
+    summary: 'Perfom a transaction between two accounts',
+    tags: ['Transactions'],
+  })
+  // precisamos saber para qual conta vai e de qual conta vem
+  @Post('transaction') // precisa de um job para processar os dados
+  async transaction(@Body() transactionDto: TransactionDto) {
+    return await this.serviceAccount.transaction(transactionDto);
+  }
+
+  @ApiOperation({
     summary: 'Create an account for an existent user',
   })
   @Post(':user_cpf')
@@ -44,16 +54,6 @@ export class AccountController {
     @Body() createAccountDto: CreateAccountDto,
   ) {
     return this.serviceAccount.createAccount(user_cpf, createAccountDto);
-  }
-
-  @ApiOperation({
-    summary: 'Perfom a transaction between two accounts',
-    tags: ['Transactions'],
-  })
-  // precisamos saber para qual conta vai e de qual conta vem
-  @Post('transaction') // precisa de um job para processar os dados
-  async transaction(@Body() transactionDto: TransactionDto) {
-    return await this.serviceAccount.transaction(transactionDto);
   }
 
   @ApiOperation({

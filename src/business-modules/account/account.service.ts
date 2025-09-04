@@ -150,6 +150,7 @@ export class AccountService {
     return {
       id: job.id,
       timestamp: job.timestamp,
+      progres: job.progress(),
     };
   }
 

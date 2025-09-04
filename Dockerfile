@@ -11,6 +11,8 @@ WORKDIR /http/app
 # COPY all the directories and files from the host machine to the container
 COPY . .
 
+COPY ./.env .env
+
 # Copy the package json into the project
 COPY package*.json ./
 
